@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.10" type="plugin" group="jshoppingproducts" method="upgrade">
+	<name>PLG_WT_JSHOPPING_SCHEMA_ORG</name>
+	<author>Sergey Tolkachyov</author>
+	<creationDate>28/08/2021</creationDate>
+	<copyright>(c) 2021 Sergey Tolkachyov</copyright>
+	<license>GNU General Public License version 3 or later</license>
+	<authorEmail>info@web-tolk.ru</authorEmail>
+	<authorUrl>https://web-tolk.ru</authorUrl>
+	<version>1.0.0</version>
+	<description>PLG_WT_JSHOPPING_SCHEMA_ORG_XML_DESCRIPTION</description>
+	<files>
+		<filename plugin="wt_jshopping_schema_org">wt_jshopping_schema_org.php</filename>
+		<folder>language</folder>
+		<folder>fields</folder>
+	</files>
+		<languages folder="language" client="administrator">
+        <language tag="en-GB">en-GB/en-GB.plg_jshoppingproducts_wt_jshopping_schema_org.ini</language>
+        <language tag="ru-RU">ru-RU/ru-RU.plg_jshoppingproducts_wt_jshopping_schema_org.ini</language>
+        <language tag="en-GB">en-GB/en-GB.plg_jshoppingproducts_wt_jshopping_schema_org.sys.ini</language>
+        <language tag="ru-RU">ru-RU/ru-RU.plg_jshoppingproducts_wt_jshopping_schema_org.sys.ini</language>
+    </languages>
+	<config>
+		 <fields name="params">
+            <fieldset name="basic">
+				<field addfieldpath="plugins/jshoppingproducts/wt_jshopping_schema_org/fields" type="plugininfo" name="plugininfo"/>
+				<field type="note" label="PLG_WT_JSHOPPING_SCHEMA_ORG_INFO_LABEL" description="PLG_WT_JSHOPPING_SCHEMA_ORG_INFO_DESC"/>
+				<field type="spacer" label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_VIEW"/>
+
+				<field type="radio"
+					   name="product_desc_is"
+					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_DESC_IS"
+					   default="short_description"
+					   class="btn-group btn-group-yesno">
+					<option value="short_description">PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_DESC_IS_SHORT_DESCRIPTION</option>
+					<option value="description">PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_DESC_IS_FULL_DESCRIPTION</option>
+				</field>
+				<field type="radio"
+					   name="product_sku_is"
+					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_SKU_IS"
+					   class="btn-group btn-group-yesno"
+					   default="product_id">
+					<option value="product_id">PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_SKU_IS_PRODUCT_ID</option>
+					<option value="product_ean">PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_SKU_IS_PRODUCT_EAN</option>
+					<option value="manufacturer_code">PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_SKU_IS_MANUFACTURER_CODE</option>
+				</field>
+				<field type="radio"
+					   name="show_product_rating"
+					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_SHOW_RATING"
+					   default="0"
+					   class="btn-group btn-group-yesno">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+
+				<field type="radio"
+					   name="show_product_availability"
+					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_SHOW_AVAILABILITY"
+					   default="0"
+					   class="btn-group btn-group-yesno">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+				<field type="list"
+					   name="product_zero_quantity_availability_type"
+					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE"
+					   default="OutOfStock"
+					   class="btn-group btn-group-yesno"
+					   showon="show_product_availability:1">
+					<option value="SoldOut">SoldOut</option>
+					<option value="PreSale">PreSale</option>
+					<option value="PreOrder">PreOrder</option>
+					<option value="OutOfStock">OutOfStock</option>
+					<option value="OnlineOnly">OnlineOnly</option>
+					<option value="LimitedAvailability">LimitedAvailability</option>
+					<option value="InStoreOnly">InStoreOnly</option>
+					<option value="Discontinued">Discontinued</option>
+					<option value="BackOrder">BackOrder</option>
+				</field>
+				<field type="note"
+					   label="SoldOut"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_SOLDOUT"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_zero_quantity_availability_type:SoldOut"/>
+				<field type="note"
+					   label="PreSale"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_PRESALE"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_zero_quantity_availability_type:PreSale"/>
+				<field type="note"
+					   label="PreOrder"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_PREORDER"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_zero_quantity_availability_type:PreOrder"/>
+				<field type="note"
+					   label="OutOfStock"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_OUTOFSTOCK"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_zero_quantity_availability_type:OutOfStock"/>
+				<field type="note"
+					   label="OnlineOnly"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_ONLINEONLY"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_zero_quantity_availability_type:OnlineOnly"/>
+				<field type="note"
+					   label="LimitedAvailability"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_LIMITEDAVAILABILITY"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_zero_quantity_availability_type:LimitedAvailability"/>
+				<field type="note"
+					   label="InStoreOnly"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_INSTOREONLY"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_zero_quantity_availability_type:InStoreOnly"/>
+				<field type="note"
+					   label="BackOrder"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_BACKORDER"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_zero_quantity_availability_type:BackOrder"/>
+				<field type="note"
+					   label="Discontinued"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_DISCONTINUED"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_zero_quantity_availability_type:Discontinued"/>
+
+
+				<field type="list"
+					   name="product_non_zero_quantity_availability_type"
+					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_NON_ZERO_QUANTITY_AVAILABILITY_TYPE"
+					   showon="show_product_availability:1"
+					   default="InStock">
+					<option value="PreSale">PreSale</option>
+					<option value="PreOrder">PreOrder</option>
+					<option value="OnlineOnly">OnlineOnly</option>
+					<option value="LimitedAvailability">LimitedAvailability</option>
+					<option value="InStoreOnly">InStoreOnly</option>
+					<option value="InStock">InStock</option>
+					<option value="BackOrder">BackOrder</option>
+				</field>
+				<field type="note"
+					   label="PreSale"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_PRESALE"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_non_zero_quantity_availability_type:PreSale"/>
+				<field type="note"
+					   label="PreOrder"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_PREORDER"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_non_zero_quantity_availability_type:PreOrder"/>
+				<field type="note"
+					   label="OnlineOnly"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_ONLINEONLY"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_non_zero_quantity_availability_type:OnlineOnly"/>
+				<field type="note"
+					   label="LimitedAvailability"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_LIMITEDAVAILABILITY"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_non_zero_quantity_availability_type:LimitedAvailability"/>
+				<field type="note"
+					   label="InStoreOnly"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_INSTOREONLY"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_non_zero_quantity_availability_type:InStoreOnly"/>
+				<field type="note"
+					   label="InStock"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_INSTOCK"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_non_zero_quantity_availability_type:InStock"/>
+				<field type="note"
+					   label="BackOrder"
+					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_BACKORDER"
+					   class="alert alert-info"
+					   showon="show_product_availability:1[AND]product_non_zero_quantity_availability_type:BackOrder"/>
+
+
+		<!-- 		<field addfieldpath="plugins/jshoppingproducts/wt_jshopping_schema_org/fields"
+					   type="jshoppingextrafields"
+					   name="product_extra_field_height"
+					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_HEIGHT_JSHOPPING_EXTRA_FIELD_ID">
+					<option value=""/>
+				</field> -->
+
+
+				<field type="radio"
+					   name="category_desc_is"
+					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_CATEGORY_DESC_IS"
+					   default="short_description"
+					   class="btn-group btn-group-yesno">
+					<option value="short_description">PLG_WT_JSHOPPING_SCHEMA_ORG_CATEGORY_DESC_IS_SHORT_DESCRIPTION</option>
+					<option value="description">PLG_WT_JSHOPPING_SCHEMA_ORG_CATEGORY_DESC_IS_FULL_DESCRIPTION</option>
+				</field>
+
+			</fieldset>
+		</fields>
+	</config>
+</extension>
