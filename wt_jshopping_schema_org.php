@@ -4,6 +4,7 @@
  * @author     Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
  * @copyright  Copyright (C) 2021 Sergey Tolkachyov. All rights reserved.
  * @license    GNU General Public License version 3 or later
+ * @version	   1.0.1
  */
 
 defined('_JEXEC') or die;
@@ -50,11 +51,13 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 			'name'     => $product->name,
 			'offers'   => array(
 				'@type'         => 'Offer',
-				'price'         => formatprice($product->product_price),
+				'price'         => $product->product_price,
 				'priceCurrency' => htmlspecialchars($jshopConfig->currency_code_iso),
 			),
 			'url'      => $link,
 		);
+
+
 
 		//		Описание товара краткое или полное
 		$product_description         = $this->params->get('product_desc_is', 'short_description');
@@ -225,7 +228,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 						'name'     => $product->name,
 						'offers'   => array(
 							'@type'         => 'Offer',
-							'price'         => formatprice($product->product_price),
+							'price'         => $product->product_price,
 							'priceCurrency' => htmlspecialchars($jshopConfig->currency_code_iso),
 						),
 						'url'      => rtrim(JUri::root(), '/') . $product->product_link,
