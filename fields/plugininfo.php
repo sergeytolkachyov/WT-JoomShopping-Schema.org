@@ -77,7 +77,7 @@ class JFormFieldPlugininfo extends JFormFieldSpacer
             </div>
 			<div style="padding: 0px 15px;">
 				<span class="label label-success">v.<?php echo $wt_plugin_info->version; ?></span>
-				<?php echo Text::_("PLG_WT_JSHOPPING_SCHEMA_ORG_XML_DESCRIPTION"); ?>
+				<?php echo Text::_("PLG_WT_JSHOPPING_SCHEMA_ORG_DESC"); ?>
 			</div>
 		</div>
 <?php

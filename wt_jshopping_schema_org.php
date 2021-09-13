@@ -187,7 +187,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 		 */
 		if($url_controller != 'manufacturer'){
 			// Добавляем вложенные категории
-			if(count($view->categories) > 0){
+			if(isset($view->categories) && count($view->categories) > 0){
 
 				foreach ($view->categories as $category)
 				{

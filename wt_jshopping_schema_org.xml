@@ -8,7 +8,8 @@
 	<authorEmail>info@web-tolk.ru</authorEmail>
 	<authorUrl>https://web-tolk.ru</authorUrl>
 	<version>1.0.1</version>
-	<description>PLG_WT_JSHOPPING_SCHEMA_ORG_XML_DESCRIPTION</description>
+	<description>PLG_WT_JSHOPPING_SCHEMA_ORG_DESC</description>
+	<scriptfile>script.php</scriptfile>
 	<files>
 		<filename plugin="wt_jshopping_schema_org">wt_jshopping_schema_org.php</filename>
 		<folder>language</folder>
@@ -194,4 +195,7 @@
 			</fieldset>
 		</fields>
 	</config>
+		<updateservers>
+			<server type="extension" name="WebTolkUpdateServer">https://web-tolk.ru/component/swjprojects/jupdate.html?element=wt_jshopping_schema_org</server>
+	</updateservers>
 </extension>
