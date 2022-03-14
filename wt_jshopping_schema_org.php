@@ -4,7 +4,7 @@
  * @author     Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
  * @copyright  Copyright (C) 2021 Sergey Tolkachyov. All rights reserved.
  * @license    GNU General Public License version 3 or later
- * @version	   1.0.1
+ * @version	   1.1.0
  */
 
 defined('_JEXEC') or die;
@@ -12,7 +12,7 @@ defined('_JEXEC') or die;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Router\Route;
-
+use Joomla\CMS\Version;
 
 class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 {
@@ -42,7 +42,20 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 	{
 		$jshopConfig = $view->config;
 		$product     = $view->product;
-		$shop_item_id = getShopMainPageItemid();
+
+			// For Joomla 3.x
+
+		if (version_compare(JVERSION, '4', '<')) {
+
+			$shop_item_id = getShopMainPageItemid();
+
+		} else {
+			// For Joomla 4.x
+			$shop_item_id = \JSHelper::getShopMainPageItemid();
+
+		}
+
+
 		$link         = Route::_("index.php?option=com_jshopping&controller=product&task=view&category_id=" . $product->category_id . "&product_id=" . $product->product_id . "&Itemid=" . $shop_item_id, '', '', true);
 		$product_info = array(
 			'@context' => 'https://schema.org',
@@ -147,7 +160,20 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 	 */
 	public function onBeforeDisplayProductListView($view, &$productlist)
 	{
-		$jshopConfig   = JSFactory::getConfig();
+
+
+		// For Joomla 3.x
+
+		if (version_compare(JVERSION, '4', '<')) {
+
+			$jshopConfig   = JSFactory::getConfig();
+
+		} else {
+			// For Joomla 4.x
+			$jshopConfig   = \JSFactory::getConfig();
+
+		}
+
 		$category_description = $this->params->get('category_desc_is', 'short_description');
 		$schema_org_list = array(
 			'@context' => 'https://schema.org',
@@ -293,15 +319,17 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 
 			}
 
+			
+			// Свойство position для элемента списка.
+			for($i = 0; $i<count($schema_org_list['itemListElement']); $i++)
+			{
+				$schema_org_list['itemListElement'][$i]['position'] = $i+1;
+			}
+			//Количество элементов списка
+			$schema_org_list['numberOfItems'] = count($schema_org_list['itemListElement']);
+			
 		}
 
-		// Свойство position для элемента списка.
-		for($i = 0; $i<count($schema_org_list['itemListElement']); $i++)
-		{
-			$schema_org_list['itemListElement'][$i]['position'] = $i+1;
-		}
-		//Количество элементов списка
-		$schema_org_list['numberOfItems'] = count($schema_org_list['itemListElement']);
 
 		$doc = Factory::getDocument();
 		$doc->addScriptDeclaration(json_encode($schema_org_list), 'application/ld+json');
@@ -317,7 +345,18 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 	 * @since 1.0.0
 	 */
 	public function onBeforeDisplayCategoryView($view){
-		$jshopConfig   = JSFactory::getConfig();
+
+		// For Joomla 3.x
+
+		if (version_compare(JVERSION, '4', '<')) {
+
+			$jshopConfig   = JSFactory::getConfig();
+
+		} else {
+			// For Joomla 4.x
+			$jshopConfig   = \JSFactory::getConfig();
+
+		}
 		$category_description = $this->params->get('category_desc_is', 'short_description');
 		$schema_org_list = array(
 			'@context' => 'https://schema.org',

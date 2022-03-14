@@ -1,11 +1,10 @@
 <?php
 /**
- * @package     WebTolk plugin info field
- * @version     1.0.0
- * @Author 		Sergey Tolkachyov, https://web-tolk.ru
- * @copyright   Copyright (C) 2020 Sergey Tolkachyov
- * @license     GNU/GPL http://www.gnu.org/licenses/gpl-2.0.html
- * @since 		1.0.0
+ * @package    WT JoomShopping Schema.org
+ * @author     Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
+ * @copyright  Copyright (C) 2021 Sergey Tolkachyov. All rights reserved.
+ * @license    GNU General Public License version 3 or later
+ * @version	   1.0.1
  */
 
 defined('_JEXEC') or die;
@@ -76,7 +75,7 @@ class JFormFieldPlugininfo extends JFormFieldSpacer
 				</a>
             </div>
 			<div style="padding: 0px 15px;">
-				<span class="label label-success">v.<?php echo $wt_plugin_info->version; ?></span>
+				<span class="badge badge-success bg-success">v.<?php echo $wt_plugin_info->version; ?></span>
 				<?php echo Text::_("PLG_WT_JSHOPPING_SCHEMA_ORG_DESC"); ?>
 			</div>
 		</div>

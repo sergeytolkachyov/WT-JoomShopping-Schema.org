@@ -1,4 +1,11 @@
 <?php
+/**
+ * @package    WT JoomShopping Schema.org
+ * @author     Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
+ * @copyright  Copyright (C) 2021 Sergey Tolkachyov. All rights reserved.
+ * @license    GNU General Public License version 3 or later
+ * @version	   1.0.1
+ */
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\FormHelper;
