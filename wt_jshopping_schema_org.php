@@ -1,10 +1,10 @@
 <?php
 /**
- * @package    WT JoomShopping Schema.org
- * @author     Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
- * @copyright  Copyright (C) 2021 Sergey Tolkachyov. All rights reserved.
- * @license    GNU General Public License version 3 or later
- * @version	   1.1.0
+ * @package       WT JoomShopping Schema.org
+ * @author        Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
+ * @copyright     Copyright (C) 2022 Sergey Tolkachyov. All rights reserved.
+ * @license       GNU General Public License version 3 or later
+ * @version       1.1.2
  */
 
 defined('_JEXEC') or die;
@@ -17,18 +17,7 @@ use Joomla\CMS\Version;
 class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 {
 
-	/**
-	 * Class Constructor
-	 *
-	 * @param   object  $subject
-	 * @param   array   $config
-	 */
-	public function __construct(&$subject, $config)
-	{
-		parent::__construct($subject, $config);
-		$this->loadLanguage();
-	}
-
+	protected $autoloadLanguage = true;
 	/**
 	 * Добавляем микроразметку https://schema.org/Product для карточки товара в формате ld+json
 	 *
@@ -43,19 +32,17 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 		$jshopConfig = $view->config;
 		$product     = $view->product;
 
-			// For Joomla 3.x
-
-		if (version_compare(JVERSION, '4', '<')) {
-
-			$shop_item_id = getShopMainPageItemid();
-
-		} else {
-			// For Joomla 4.x
+		if ((new Version())->isCompatible('4.0'))
+		{
+			// Joomla 4
 			$shop_item_id = \JSHelper::getShopMainPageItemid();
-
 		}
-
-
+		else
+		{
+			// For Joomla 3
+			$shop_item_id = getShopMainPageItemid();
+		}
+		
 		$link         = Route::_("index.php?option=com_jshopping&controller=product&task=view&category_id=" . $product->category_id . "&product_id=" . $product->product_id . "&Itemid=" . $shop_item_id, '', '', true);
 		$product_info = array(
 			'@context' => 'https://schema.org',
@@ -69,7 +56,6 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 			),
 			'url'      => $link,
 		);
-
 
 
 		//		Описание товара краткое или полное
@@ -108,19 +94,21 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 		}
 
 
-
-		$product_sku = $this->params->get('product_sku_is','product_id');
-		if($product_sku != 'product_id'){
+		$product_sku = $this->params->get('product_sku_is', 'product_id');
+		if ($product_sku != 'product_id')
+		{
 			// Проверяем, заполнены ли поля кода товара или артикула.
 			// Если пусто - не пишем.
 			// id товара всегда есть - пишем
-			if(!empty($product->$product_sku)){
+			if (!empty($product->$product_sku))
+			{
 				$product_info['sku'] = $product->$product_sku;
 			}
-		} else{
+		}
+		else
+		{
 			$product_info['sku'] = $product->$product_sku;
 		}
-
 
 
 //		Высота
@@ -143,7 +131,6 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 		}
 
 
-
 		$doc = Factory::getDocument();
 		$doc->addScriptDeclaration(json_encode($product_info), 'application/ld+json');
 
@@ -152,6 +139,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 
 	/**
 	 * Добавляем микроразметку Schema.org в формате ld+json в вид категории товаров.
+	 *
 	 * @param $view         object      JoomShooping product list view object, contains a category info, list of sub-categories, product list etc.
 	 * @param $productlist  object      Product list of this category
 	 *
@@ -161,78 +149,94 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 	public function onBeforeDisplayProductListView($view, &$productlist)
 	{
 
-
-		// For Joomla 3.x
-
-		if (version_compare(JVERSION, '4', '<')) {
-
-			$jshopConfig   = JSFactory::getConfig();
-
-		} else {
-			// For Joomla 4.x
-			$jshopConfig   = \JSFactory::getConfig();
-
+		if ((new Version())->isCompatible('4.0'))
+		{
+			// Joomla 4
+			$jshopConfig = \JSFactory::getConfig();
+			$option      = Factory::getApplication()->getInput()->get('option');
+		}
+		else
+		{
+			// For Joomla 3
+			$jshopConfig = JSFactory::getConfig();
+			$option      = Factory::getApplication()->input->get('option');
 		}
 
+		// Work only in JoomShopping area
+		if ($option != 'com_jshopping')
+		{
+			return;
+		}
+
+
 		$category_description = $this->params->get('category_desc_is', 'short_description');
-		$schema_org_list = array(
+		$schema_org_list      = array(
 			'@context' => 'https://schema.org',
-			'@type' => 'ItemList',
-			'url' => JUri::current(),
+			'@type'    => 'ItemList',
+			'url'      => JUri::current(),
 		);
 
 		// Категория товаров
-		if (isset($view->category)){
+		if (isset($view->category))
+		{
 			$schema_org_list['name'] = $view->category->name;
-			if(!empty($view->category->category_image)){
-				$schema_org_list['image'] = $jshopConfig->image_category_live_path.'/'.$view->category->category_image;
+			if (!empty($view->category->category_image))
+			{
+				$schema_org_list['image'] = $jshopConfig->image_category_live_path . '/' . $view->category->category_image;
 			}
 			//Для получения описания
 			$data_source = 'category';
-		//Список товаров производителя.
-		}elseif (isset($view->manufacturer)){
+			//Список товаров производителя.
+		}
+		elseif (isset($view->manufacturer))
+		{
 			$schema_org_list['name'] = $view->manufacturer->name;
-			if(!empty($view->manufacturer->manufacturer_logo)){
-				$schema_org_list['image'] = $jshopConfig->image_manufs_live_path.'/'.$view->manufacturer->manufacturer_logo;
+			if (!empty($view->manufacturer->manufacturer_logo))
+			{
+				$schema_org_list['image'] = $jshopConfig->image_manufs_live_path . '/' . $view->manufacturer->manufacturer_logo;
 			}
 			//Для получения описания
 			$data_source = 'manufacturer';
 		}
 
 
-		if(!empty($view->category->$category_description)){
+		if (!empty($view->category->$category_description))
+		{
 			$schema_org_list['description'] = strip_tags($view->$data_source->$category_description);
 		}
 
-		$app = Factory::getApplication();
+		$app            = Factory::getApplication();
 		$url_controller = $app->input->get('controller');
 
 		/*
 		 * Дочерние категории есть только в категориях.
 		 * На странице списка товаров производителя не будем заниматься дурью
 		 */
-		if($url_controller != 'manufacturer'){
+		if ($url_controller != 'manufacturer')
+		{
 			// Добавляем вложенные категории
-			if(isset($view->categories) && count($view->categories) > 0){
+			if (isset($view->categories) && count($view->categories) > 0)
+			{
 
 				foreach ($view->categories as $category)
 				{
 					$category_info = array(
 						'@type' => 'ListItem',
-						'name' => $category->name,
-						'url'      => rtrim(JUri::root(), '/') . $category->category_link,
+						'name'  => $category->name,
+						'url'   => rtrim(JUri::root(), '/') . $category->category_link,
 
 					);
-					if(!empty($category->category_image)){
+					if (!empty($category->category_image))
+					{
 						$category_info['image'] = $jshopConfig->image_product_live_path . '/' . $category->category_image;
 					}
-					if(!empty($category->$category_description)){
+					if (!empty($category->$category_description))
+					{
 						$category_info['description'] = strip_tags($category->$category_description);
 					}
 					$schema_org_list['itemListElement'][] = $category_info;
 
 				}
-
 
 
 			}
@@ -247,17 +251,17 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 
 				$product_info = array(
 					"@type" => "ListItem",
-					'item' => array(
+					'item'  => array(
 
-						'@type'    => 'Product',
-						'image'    => $product->image,
-						'name'     => $product->name,
-						'offers'   => array(
+						'@type'  => 'Product',
+						'image'  => $product->image,
+						'name'   => $product->name,
+						'offers' => array(
 							'@type'         => 'Offer',
 							'price'         => $product->product_price,
 							'priceCurrency' => htmlspecialchars($jshopConfig->currency_code_iso),
 						),
-						'url'      => rtrim(JUri::root(), '/') . $product->product_link,
+						'url'    => rtrim(JUri::root(), '/') . $product->product_link,
 					)
 				);
 
@@ -302,32 +306,36 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 					$product_info['item']['offers']['availability'] = $availability;
 				}
 
-				$product_sku = $this->params->get('product_sku_is','product_id');
-					if($product_sku != 'product_id'){
-						// Проверяем, заполнены ли поля кода товара или артикула.
-						// Если пусто - не пишем.
-						// id товара всегда есть - пишем
-						if(!empty($product->$product_sku)){
-							$product_info['item']['sku'] = $product->$product_sku;
-						}
-					} else{
+				$product_sku = $this->params->get('product_sku_is', 'product_id');
+				if ($product_sku != 'product_id')
+				{
+					// Проверяем, заполнены ли поля кода товара или артикула.
+					// Если пусто - не пишем.
+					// id товара всегда есть - пишем
+					if (!empty($product->$product_sku))
+					{
 						$product_info['item']['sku'] = $product->$product_sku;
 					}
+				}
+				else
+				{
+					$product_info['item']['sku'] = $product->$product_sku;
+				}
 
 
 				$schema_org_list['itemListElement'][] = $product_info;
 
 			}
 
-			
+
 			// Свойство position для элемента списка.
-			for($i = 0; $i<count($schema_org_list['itemListElement']); $i++)
+			for ($i = 0; $i < count($schema_org_list['itemListElement']); $i++)
 			{
-				$schema_org_list['itemListElement'][$i]['position'] = $i+1;
+				$schema_org_list['itemListElement'][$i]['position'] = $i + 1;
 			}
 			//Количество элементов списка
 			$schema_org_list['numberOfItems'] = count($schema_org_list['itemListElement']);
-			
+
 		}
 
 
@@ -340,28 +348,30 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 	 * Триггер срабатывает на главной странице магазина JoomShopping.
 	 * В объекте категории пусто, так как это root-категория. Поэтому данные
 	 * берём из params
+	 *
 	 * @param $view     object  Jshopping category object
 	 *
 	 * @since 1.0.0
 	 */
-	public function onBeforeDisplayCategoryView($view){
+	public function onBeforeDisplayCategoryView($view)
+	{
 
-		// For Joomla 3.x
-
-		if (version_compare(JVERSION, '4', '<')) {
-
-			$jshopConfig   = JSFactory::getConfig();
-
-		} else {
-			// For Joomla 4.x
-			$jshopConfig   = \JSFactory::getConfig();
-
+			if ((new Version())->isCompatible('4.0'))
+		{
+			// Joomla 4
+			$jshopConfig = \JSFactory::getConfig();
 		}
+		else
+		{
+			// For Joomla 3
+			$jshopConfig = JSFactory::getConfig();
+		}
+		
 		$category_description = $this->params->get('category_desc_is', 'short_description');
-		$schema_org_list = array(
+		$schema_org_list      = array(
 			'@context' => 'https://schema.org',
-			'@type' => 'ItemList',
-			'url' => JUri::current(),
+			'@type'    => 'ItemList',
+			'url'      => JUri::current(),
 		);
 
 		//Заголовок окна браузера
@@ -369,26 +379,32 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 
 		// Из meta-description пункта меню.
 		// Если оно пустое - Description из общих настроек сайта
-		if(!empty($view->params->get('menu-meta_description'))){
+		if (!empty($view->params->get('menu-meta_description')))
+		{
 			$schema_org_list['description'] = strip_tags($view->params->get('menu-meta_description'));
-		} else{
+		}
+		else
+		{
 			$schema_org_list['description'] = strip_tags($view->params->get('page_description'));
 		}
 
 		// Добавляем вложенные категории
-		if(count($view->categories) > 0){
+		if (count($view->categories) > 0)
+		{
 
 			foreach ($view->categories as $category)
 			{
 				$category_info = array(
 					'@type' => 'ListItem',
-					'name' => $category->name,
-					'url'      => rtrim(JUri::root(), '/') . $category->category_link,
+					'name'  => $category->name,
+					'url'   => rtrim(JUri::root(), '/') . $category->category_link,
 				);
-				if(!empty($category->category_image)){
+				if (!empty($category->category_image))
+				{
 					$category_info['image'] = $jshopConfig->image_product_live_path . '/' . $category->category_image;
 				}
-				if(!empty($category->$category_description)){
+				if (!empty($category->$category_description))
+				{
 					$category_info['description'] = strip_tags($category->$category_description);
 				}
 				$schema_org_list['itemListElement'][] = $category_info;
@@ -396,9 +412,9 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 			}
 
 			// Свойство position для элемента списка.
-			for($i = 0; $i<count($schema_org_list['itemListElement']); $i++)
+			for ($i = 0; $i < count($schema_org_list['itemListElement']); $i++)
 			{
-				$schema_org_list['itemListElement'][$i]['position'] = $i+1;
+				$schema_org_list['itemListElement'][$i]['position'] = $i + 1;
 			}
 
 		}
@@ -411,17 +427,19 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 	 * Триггер срабатывает на списке производителей JoomShopping.
 	 * В объекте категории пусто, так как это root-категория. Поэтому данные
 	 * берём из params
+	 *
 	 * @param $view     object  JshoppingViewManufacturer  object
 	 *
 	 * @since 1.0.0
 	 */
-	public function onBeforeDisplayManufacturerView($view){
+	public function onBeforeDisplayManufacturerView($view)
+	{
 
 		$category_description = $this->params->get('category_desc_is', 'short_description');
-		$schema_org_list = array(
+		$schema_org_list      = array(
 			'@context' => 'https://schema.org',
-			'@type' => 'ItemList',
-			'url' => JUri::current(),
+			'@type'    => 'ItemList',
+			'url'      => JUri::current(),
 		);
 
 		//Заголовок окна браузера
@@ -429,26 +447,32 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 
 		// Из meta-description пункта меню.
 		// Если оно пустое - Description из общих настроек сайта
-		if(!empty($view->params->get('menu-meta_description'))){
+		if (!empty($view->params->get('menu-meta_description')))
+		{
 			$schema_org_list['description'] = strip_tags($view->params->get('menu-meta_description'));
-		} else{
+		}
+		else
+		{
 			$schema_org_list['description'] = strip_tags($view->params->get('page_description'));
 		}
 
 		// Добавляем вложенные категории
-		if(count($view->rows) > 0){
+		if (count($view->rows) > 0)
+		{
 
 			foreach ($view->rows as $manufacturer)
 			{
 				$manufacturer_info = array(
 					'@type' => 'ListItem',
-					'name' => $manufacturer->name,
-					'url'      => rtrim(JUri::root(), '/') . $manufacturer->link,
+					'name'  => $manufacturer->name,
+					'url'   => rtrim(JUri::root(), '/') . $manufacturer->link,
 				);
-				if(!empty($manufacturer->manufacturer_logo)){
+				if (!empty($manufacturer->manufacturer_logo))
+				{
 					$manufacturer_info['image'] = $view->image_manufs_live_path . '/' . $manufacturer->manufacturer_logo;
 				}
-				if(!empty($manufacturer->$category_description)){
+				if (!empty($manufacturer->$category_description))
+				{
 					$manufacturer_info['description'] = strip_tags($manufacturer->$category_description);
 				}
 				$schema_org_list['itemListElement'][] = $manufacturer_info;
@@ -456,9 +480,9 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 			}
 
 			// Свойство position для элемента списка.
-			for($i = 0; $i<count($schema_org_list['itemListElement']); $i++)
+			for ($i = 0; $i < count($schema_org_list['itemListElement']); $i++)
 			{
-				$schema_org_list['itemListElement'][$i]['position'] = $i+1;
+				$schema_org_list['itemListElement'][$i]['position'] = $i + 1;
 			}
 
 		}

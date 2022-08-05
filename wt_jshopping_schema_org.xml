@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<extension version="3.10" type="plugin" group="jshoppingproducts" method="upgrade">
+<extension type="plugin" group="jshoppingproducts" method="upgrade">
 	<name>PLG_WT_JSHOPPING_SCHEMA_ORG</name>
 	<author>Sergey Tolkachyov</author>
-	<creationDate>09/03/2022</creationDate>
+	<creationDate>04/08/2022</creationDate>
 	<copyright>(c) 2022 Sergey Tolkachyov</copyright>
 	<license>GNU General Public License version 3 or later</license>
 	<authorEmail>info@web-tolk.ru</authorEmail>
 	<authorUrl>https://web-tolk.ru</authorUrl>
-	<version>1.1.0</version>
+	<version>1.1.2</version>
 	<description>PLG_WT_JSHOPPING_SCHEMA_ORG_DESC</description>
 	<scriptfile>script.php</scriptfile>
 	<files>
