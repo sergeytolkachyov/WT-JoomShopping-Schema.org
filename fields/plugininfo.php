@@ -41,7 +41,7 @@ class JFormFieldPlugininfo extends JFormFieldSpacer
 	 */
 	protected function getLabel()
 	{
-		$doc = Factory::getDocument();
+		$doc = Factory::getApplication()->getDocument();
 		$doc->addStyleDeclaration("
 			.wt-b24-plugin-info{
 				box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); 

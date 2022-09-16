@@ -4,7 +4,7 @@
  * @author        Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
  * @copyright     Copyright (C) 2022 Sergey Tolkachyov. All rights reserved.
  * @license       GNU General Public License version 3 or later
- * @version       1.1.2
+ * @version       1.1.3
  */
 
 defined('_JEXEC') or die;
@@ -18,6 +18,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 {
 
 	protected $autoloadLanguage = true;
+
 	/**
 	 * Добавляем микроразметку https://schema.org/Product для карточки товара в формате ld+json
 	 *
@@ -32,18 +33,19 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 		$jshopConfig = $view->config;
 		$product     = $view->product;
 
+		$link         = "index.php?option=com_jshopping&controller=product&task=view&category_id=" . $view->category_id . "&product_id=" . $product->product_id;
 		if ((new Version())->isCompatible('4.0'))
 		{
 			// Joomla 4
-			$shop_item_id = \JSHelper::getShopMainPageItemid();
+			$Itemid = \JSHelper::getDefaultItemid($link);
 		}
 		else
 		{
 			// For Joomla 3
-			$shop_item_id = getShopMainPageItemid();
+			$Itemid = getDefaultItemid($link);
 		}
-		
-		$link         = Route::_("index.php?option=com_jshopping&controller=product&task=view&category_id=" . $product->category_id . "&product_id=" . $product->product_id . "&Itemid=" . $shop_item_id, '', '', true);
+		$link         = Route::_("index.php?option=com_jshopping&controller=product&task=view&category_id=" . $view->category_id . "&product_id=" . $product->product_id . "&Itemid=" . $Itemid, '', '', true);
+
 		$product_info = array(
 			'@context' => 'https://schema.org',
 			'@type'    => 'Product',
@@ -124,14 +126,14 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 //		}
 //
 
-
-		if ((float) $product->weight > 0)
+		if ($product->product_weight && (float) $product->product_weight > 0)
 		{
-			$product_info['weight'] = $product->weight;
+
+			$product_info['weight'] = $product->product_weight;
 		}
 
 
-		$doc = Factory::getDocument();
+		$doc = Factory::getApplication()->getDocument();
 		$doc->addScriptDeclaration(json_encode($product_info), 'application/ld+json');
 
 	}
@@ -283,9 +285,9 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 				}
 
 				// Вес товара
-				if ((float) $product->weight > 0)
+				if ($product->product_weight && (float) $product->product_weight > 0)
 				{
-					$product_info['item']['weight'] = $product->weight;
+					$product_info['item']['weight'] = $product->product_weight;
 				}
 
 
@@ -339,7 +341,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 		}
 
 
-		$doc = Factory::getDocument();
+		$doc = Factory::getApplication()->getDocument();
 		$doc->addScriptDeclaration(json_encode($schema_org_list), 'application/ld+json');
 	}
 
@@ -356,7 +358,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 	public function onBeforeDisplayCategoryView($view)
 	{
 
-			if ((new Version())->isCompatible('4.0'))
+		if ((new Version())->isCompatible('4.0'))
 		{
 			// Joomla 4
 			$jshopConfig = \JSFactory::getConfig();
@@ -366,7 +368,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 			// For Joomla 3
 			$jshopConfig = JSFactory::getConfig();
 		}
-		
+
 		$category_description = $this->params->get('category_desc_is', 'short_description');
 		$schema_org_list      = array(
 			'@context' => 'https://schema.org',
@@ -419,7 +421,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 
 		}
 
-		$doc = Factory::getDocument();
+		$doc = Factory::getApplication()->getDocument();
 		$doc->addScriptDeclaration(json_encode($schema_org_list), 'application/ld+json');
 	}
 
@@ -487,7 +489,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 
 		}
 
-		$doc = Factory::getDocument();
+		$doc = Factory::getApplication()->getDocument();
 		$doc->addScriptDeclaration(json_encode($schema_org_list), 'application/ld+json');
 
 	}
