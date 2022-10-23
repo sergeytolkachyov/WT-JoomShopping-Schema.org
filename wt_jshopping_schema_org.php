@@ -245,7 +245,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 		}
 
 		// Добавляем товары
-		if (count($productlist->products) > 0)
+		if (isset($productlist->products) && count($productlist->products) > 0)
 		{
 			$product_description = $this->params->get('product_desc_is', 'short_description');
 			foreach ($productlist->products as $product)
@@ -391,7 +391,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 		}
 
 		// Добавляем вложенные категории
-		if (count($view->categories) > 0)
+		if (isset($view->categories) && count($view->categories) > 0)
 		{
 
 			foreach ($view->categories as $category)
@@ -459,7 +459,7 @@ class PlgJshoppingproductsWt_jshopping_schema_org extends CMSPlugin
 		}
 
 		// Добавляем вложенные категории
-		if (count($view->rows) > 0)
+		if (isset($view->rows) && count($view->rows) > 0)
 		{
 
 			foreach ($view->rows as $manufacturer)
