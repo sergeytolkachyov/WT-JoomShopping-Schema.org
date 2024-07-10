@@ -2,29 +2,30 @@
 <extension type="plugin" group="jshoppingproducts" method="upgrade">
 	<name>PLG_WT_JSHOPPING_SCHEMA_ORG</name>
 	<author>Sergey Tolkachyov</author>
-	<creationDate>23/10/2022</creationDate>
+	<creationDate>July 2024</creationDate>
 	<copyright>(c) 2022 Sergey Tolkachyov</copyright>
 	<license>GNU General Public License version 3 or later</license>
 	<authorEmail>info@web-tolk.ru</authorEmail>
 	<authorUrl>https://web-tolk.ru</authorUrl>
-	<version>1.1.5</version>
+	<version>2.0.0</version>
 	<description>PLG_WT_JSHOPPING_SCHEMA_ORG_DESC</description>
+	<namespace path="src">Joomla\Plugin\Jshoppingproducts\Wt_jshopping_schema_org</namespace>
 	<scriptfile>script.php</scriptfile>
 	<files>
-		<filename plugin="wt_jshopping_schema_org">wt_jshopping_schema_org.php</filename>
+		<folder plugin="wt_jshopping_schema_org">src</folder>
 		<folder>language</folder>
-		<folder>fields</folder>
+		<folder>services</folder>
 	</files>
 		<languages folder="language" client="administrator">
-        <language tag="en-GB">en-GB/en-GB.plg_jshoppingproducts_wt_jshopping_schema_org.ini</language>
-        <language tag="ru-RU">ru-RU/ru-RU.plg_jshoppingproducts_wt_jshopping_schema_org.ini</language>
-        <language tag="en-GB">en-GB/en-GB.plg_jshoppingproducts_wt_jshopping_schema_org.sys.ini</language>
-        <language tag="ru-RU">ru-RU/ru-RU.plg_jshoppingproducts_wt_jshopping_schema_org.sys.ini</language>
+        <language tag="en-GB">en-GB/plg_jshoppingproducts_wt_jshopping_schema_org.ini</language>
+        <language tag="ru-RU">ru-RU/plg_jshoppingproducts_wt_jshopping_schema_org.ini</language>
+        <language tag="en-GB">en-GB/plg_jshoppingproducts_wt_jshopping_schema_org.sys.ini</language>
+        <language tag="ru-RU">ru-RU/plg_jshoppingproducts_wt_jshopping_schema_org.sys.ini</language>
     </languages>
 	<config>
 		 <fields name="params">
             <fieldset name="basic">
-				<field addfieldpath="plugins/jshoppingproducts/wt_jshopping_schema_org/fields" type="plugininfo" name="plugininfo"/>
+				<field addfieldprefix="Joomla\Plugin\Jshoppingproducts\Wt_jshopping_schema_org\Fields" type="plugininfo" name="plugininfo"/>
 				<field type="note" label="PLG_WT_JSHOPPING_SCHEMA_ORG_INFO_LABEL" description="PLG_WT_JSHOPPING_SCHEMA_ORG_INFO_DESC"/>
 				<field type="spacer" label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_VIEW"/>
 
@@ -173,16 +174,6 @@
 					   description="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_ZERO_QUANTITY_AVAILABILITY_TYPE_BACKORDER"
 					   class="alert alert-info"
 					   showon="show_product_availability:1[AND]product_non_zero_quantity_availability_type:BackOrder"/>
-
-
-		<!-- 		<field addfieldpath="plugins/jshoppingproducts/wt_jshopping_schema_org/fields"
-					   type="jshoppingextrafields"
-					   name="product_extra_field_height"
-					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_PRODUCT_HEIGHT_JSHOPPING_EXTRA_FIELD_ID">
-					<option value=""/>
-				</field> -->
-
-
 				<field type="radio"
 					   name="category_desc_is"
 					   label="PLG_WT_JSHOPPING_SCHEMA_ORG_CATEGORY_DESC_IS"
@@ -195,7 +186,8 @@
 			</fieldset>
 		</fields>
 	</config>
-		<updateservers>
-			<server type="extension" name="WebTolkUpdateServer">https://web-tolk.ru/component/swjprojects/jupdate.html?element=wt_jshopping_schema_org</server>
+	<updateservers>
+		<server type="extension" priority="1" name="WT Schema.Org for JoomShopping  updates">https://web-tolk.ru/component/swjprojects/jupdate?element=wt_jshopping_schema_org</server>
 	</updateservers>
+	<changelogurl>https://web-tolk.ru/jchangelog?element=wt_jshopping_schema_org</changelogurl>
 </extension>
