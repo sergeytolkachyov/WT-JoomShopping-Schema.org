@@ -4,7 +4,7 @@
  * @author        Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
  * @copyright     Copyright (C) 2022 Sergey Tolkachyov. All rights reserved.
  * @license       GNU General Public License version 3 or later
- * @version       2.1.0
+ * @version       2.1.1
  */
 declare(strict_types=1);
 
@@ -195,6 +195,25 @@ return new class () implements ServiceProviderInterface {
 
                 return true;
 
+            }
+            /**
+             * Enable plugin after installation.
+             *
+             * @param   InstallerAdapter  $adapter  Parent object calling object.
+             *
+             * @since  1.0.0
+             */
+            protected function enablePlugin(InstallerAdapter $adapter)
+            {
+                // Prepare plugin object
+                $plugin          = new \stdClass();
+                $plugin->type    = 'plugin';
+                $plugin->element = $adapter->getElement();
+                $plugin->folder  = (string) $adapter->getParent()->manifest->attributes()['group'];
+                $plugin->enabled = 1;
+
+                // Update record
+                $this->db->updateObject('#__extensions', $plugin, ['type', 'element', 'folder']);
             }
 
             /**
