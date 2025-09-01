@@ -4,18 +4,21 @@
  * @author        Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
  * @copyright     Copyright (C) 2022 Sergey Tolkachyov. All rights reserved.
  * @license       GNU General Public License version 3 or later
- * @version       2.0.0
+ * @version       2.1.0
  */
 
 namespace Joomla\Plugin\Jshoppingproducts\Wt_jshopping_schema_org\Extension;
 
-defined('_JEXEC') or die;
-
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Component\Jshopping\Site\Helper\Helper;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
+use Joomla\Component\Jshopping\Site\Lib\JSFactory;
+use function defined;
+
+defined('_JEXEC') or die;
 
 class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
 {
@@ -32,9 +35,9 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'onBeforeDisplayProductView' => 'onBeforeDisplayProductView',
-            'onBeforeDisplayProductListView' => 'onBeforeDisplayProductListView',
-            'onBeforeDisplayCategoryView' => 'onBeforeDisplayCategoryView',
+            'onBeforeDisplayProductView'      => 'onBeforeDisplayProductView',
+            'onBeforeDisplayProductListView'  => 'onBeforeDisplayProductListView',
+            'onBeforeDisplayCategoryView'     => 'onBeforeDisplayCategoryView',
             'onBeforeDisplayManufacturerView' => 'onBeforeDisplayManufacturerView',
         ];
     }
@@ -42,7 +45,7 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
     /**
      * Добавляем микроразметку https://schema.org/Product для карточки товара в формате ld+json
      *
-     * @param \Joomla\Event\Event $event
+     * @param   Event  $event
      *
      * @return  void
      *
@@ -55,52 +58,75 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
          */
         [$view] = $event->getArguments();
         $jshopConfig = $view->config;
-        $product = $view->product;
+        $product     = $view->product;
 
-        $link = "index.php?option=com_jshopping&controller=product&task=view&category_id=" . $view->category_id . "&product_id=" . $product->product_id;
-        $Itemid = \JSHelper::getDefaultItemid($link);
-        $link = Route::_("index.php?option=com_jshopping&controller=product&task=view&category_id=" . $view->category_id . "&product_id=" . $product->product_id . "&Itemid=" . $Itemid, '', '', true);
+        $link   = 'index.php?option=com_jshopping&controller=product&task=view&category_id=' . $view->category_id . '&product_id=' . $product->product_id;
+        $Itemid = Helper::getDefaultItemid($link);
+        $link   = Route::_(
+            'index.php?option=com_jshopping&controller=product&task=view&category_id=' . $view->category_id . '&product_id=' . $product->product_id . '&Itemid=' . $Itemid,
+            '',
+            '',
+            true
+        );
 
         $product_info = [
             '@context' => 'https://schema.org',
-            '@type' => 'Product',
-            'image' => $jshopConfig->image_product_live_path . '/' . $product->image,
-            'name' => $product->name,
-            'offers' => [
-                '@type' => 'Offer',
-                'price' => $product->product_price,
+            '@type'    => 'Product',
+            'image'    => $jshopConfig->image_product_live_path . '/' . $product->image,
+            'name'     => $product->name,
+            'offers'   => [
+                '@type'         => 'Offer',
+                'price'         => $product->product_price,
                 'priceCurrency' => htmlspecialchars($jshopConfig->currency_code_iso),
             ],
-            'url' => $link,
+            'url'      => $link,
         ];
 
+        if (!empty($manufacturer_info = $product->getManufacturerInfo())) {
+            $brand = [
+                '@type' => 'Brand',
+                'name'  => $manufacturer_info->name,
+            ];
+            if (!empty($manufacturer_info->manufacturer_logo)) {
+                $brand['logo'] = $jshopConfig->image_manufs_live_path . '/' . $manufacturer_info->manufacturer_logo;
+            }
+            if (!empty($manufacturer_info->manufacturer_url)) {
+                $brand['url'] = $manufacturer_info->manufacturer_url;
+            }
+
+            $product_info['brand'] = $brand;
+        }
 
         //		Описание товара краткое или полное
-        $product_description = $this->params->get('product_desc_is', 'short_description');
-        $product_info['description'] = $product->$product_description;
+        $product_description         = $this->params->get('product_desc_is', 'short_description');
+        $product_info['description'] = strip_tags($product->$product_description);
 
 
         //		Рейтинг товара
         if ($this->params->get('show_product_rating', 0) == 1) {
             $product_info['aggregateRating'] = [
-                '@type' => 'AggregateRating',
-                'bestRating' => $jshopConfig->max_mark,
+                '@type'       => 'AggregateRating',
+                'bestRating'  => $jshopConfig->max_mark,
                 'ratingCount' => $product->reviews_count,
                 'ratingValue' => $product->average_rating,
 
             ];
         }
 
-
-        /*
+        /**
          * Показываем наличие товара, тип наличия.
          */
         if ($this->params->get('show_product_availability') == 1) {
             if ((float)$product->product_quantity == 0) {
-                $availability = 'https://schema.org/' . $this->params->get('product_zero_quantity_availability_type', 'OutOfStock');
-
+                $availability = 'https://schema.org/' . $this->params->get(
+                        'product_zero_quantity_availability_type',
+                        'OutOfStock'
+                    );
             } else {
-                $availability = 'https://schema.org/' . $this->params->get('product_non_zero_quantity_availability_type', 'InStock');
+                $availability = 'https://schema.org/' . $this->params->get(
+                        'product_non_zero_quantity_availability_type',
+                        'InStock'
+                    );
             }
             $product_info['offers']['availability'] = $availability;
         }
@@ -118,20 +144,18 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
         }
 
         if ($product->product_weight && (float)$product->product_weight > 0) {
-
             $product_info['weight'] = $product->product_weight;
         }
 
         $doc = $this->getApplication()->getDocument();
         $doc->addScriptDeclaration(json_encode($product_info), 'application/ld+json');
-
     }
 
 
     /**
      * Добавляем микроразметку Schema.org в формате ld+json в вид категории товаров.
      *
-     * @param \Joomla\Event\Event $event
+     * @param   Event  $event
      *
      * @return void
      * @since 1.0.0
@@ -144,13 +168,13 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
          */
         [$view, $productlist] = $event->getArguments();
 
-        $jshopConfig = \JSFactory::getConfig();
+        $jshopConfig = JSFactory::getConfig();
 
         $category_description = $this->params->get('category_desc_is', 'short_description');
-        $schema_org_list = [
+        $schema_org_list      = [
             '@context' => 'https://schema.org',
-            '@type' => 'ItemList',
-            'url' => Uri::current(),
+            '@type'    => 'ItemList',
+            'url'      => Uri::current(),
         ];
 
         // Категория товаров
@@ -171,12 +195,11 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
             $data_source = 'manufacturer';
         }
 
-
         if (!empty($view->category->$category_description)) {
             $schema_org_list['description'] = strip_tags($view->$data_source->$category_description);
         }
 
-        $app = $this->getApplication();
+        $app            = $this->getApplication();
         $url_controller = $app->getInput()->getWord('controller');
 
         /**
@@ -186,12 +209,11 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
         if ($url_controller != 'manufacturer') {
             // Добавляем вложенные категории
             if (isset($view->categories) && count($view->categories) > 0) {
-
                 foreach ($view->categories as $category) {
                     $category_info = [
                         '@type' => 'ListItem',
-                        'name' => $category->name,
-                        'url' => rtrim(Uri::root(), '/') . $category->category_link,
+                        'name'  => $category->name,
+                        'url'   => rtrim(Uri::root(), '/') . $category->category_link,
                     ];
                     if (!empty($category->category_image)) {
                         $category_info['image'] = $jshopConfig->image_product_live_path . '/' . $category->category_image;
@@ -208,32 +230,30 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
         if (isset($productlist->products) && count($productlist->products) > 0) {
             $product_description = $this->params->get('product_desc_is', 'short_description');
             foreach ($productlist->products as $product) {
-
                 $product_info = [
                     "@type" => "ListItem",
-                    'item' => [
-                        '@type' => 'Product',
-                        'image' => $product->image,
-                        'name' => $product->name,
+                    'item'  => [
+                        '@type'  => 'Product',
+                        'image'  => $product->image,
+                        'name'   => $product->name,
                         'offers' => [
-                            '@type' => 'Offer',
-                            'price' => $product->product_price,
+                            '@type'         => 'Offer',
+                            'price'         => $product->product_price,
                             'priceCurrency' => htmlspecialchars($jshopConfig->currency_code_iso),
                         ],
-                        'url' => rtrim(Uri::root(), '/') . $product->product_link,
-                    ]
+                        'url'    => rtrim(Uri::root(), '/') . $product->product_link,
+                    ],
                 ];
 
                 //		Описание товара краткое или полное
 
-                $product_info['item']['description'] = $product->$product_description;
-
+                $product_info['item']['description'] = strip_tags($product->$product_description);
 
                 //		Рейтинг товара
                 if ($this->params->get('show_product_rating', 0) == 1) {
                     $product_info['item']['aggregateRating'] = [
-                        '@type' => 'AggregateRating',
-                        'bestRating' => $jshopConfig->max_mark,
+                        '@type'       => 'AggregateRating',
+                        'bestRating'  => $jshopConfig->max_mark,
                         'ratingCount' => $product->reviews_count,
                         'ratingValue' => $product->average_rating,
 
@@ -245,15 +265,20 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
                     $product_info['item']['weight'] = $product->product_weight;
                 }
 
-                /*
+                /**
                  * Показываем наличие товара, тип наличия.
                  */
                 if ($this->params->get('show_product_availability') == 1) {
                     if ((float)$product->product_quantity == 0) {
-                        $availability = 'https://schema.org/' . $this->params->get('product_zero_quantity_availability_type', 'OutOfStock');
-
+                        $availability = 'https://schema.org/' . $this->params->get(
+                                'product_zero_quantity_availability_type',
+                                'OutOfStock'
+                            );
                     } else {
-                        $availability = 'https://schema.org/' . $this->params->get('product_non_zero_quantity_availability_type', 'InStock');
+                        $availability = 'https://schema.org/' . $this->params->get(
+                                'product_non_zero_quantity_availability_type',
+                                'InStock'
+                            );
                     }
                     $product_info['item']['offers']['availability'] = $availability;
                 }
@@ -271,7 +296,6 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
                 }
 
                 $schema_org_list['itemListElement'][] = $product_info;
-
             }
 
 
@@ -293,22 +317,22 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
      * В объекте категории пусто, так как это root-категория. Поэтому данные
      * берём из params
      *
-     * @param \Joomla\Event\Event $event
+     * @param   Event  $event
      *
      * @since 1.0.0
      */
     public function onBeforeDisplayCategoryView(Event $event): void
     {
         /**
-         * @param object $view JoomShooping product list view object, contains a category info, list of sub-categories, product list etc.
+         * @param   object  $view  JoomShooping product list view object, contains a category info, list of sub-categories, product list etc.
          */
         [$view] = $event->getArguments();
-        $jshopConfig = \JSFactory::getConfig();
+        $jshopConfig          = JSFactory::getConfig();
         $category_description = $this->params->get('category_desc_is', 'short_description');
-        $schema_org_list = [
+        $schema_org_list      = [
             '@context' => 'https://schema.org',
-            '@type' => 'ItemList',
-            'url' => Uri::current(),
+            '@type'    => 'ItemList',
+            'url'      => Uri::current(),
         ];
 
         //Заголовок окна браузера
@@ -324,13 +348,12 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
 
         // Добавляем вложенные категории
         if (isset($view->categories) && count($view->categories) > 0) {
-
             foreach ($view->categories as $category) {
-                $category_info = array(
+                $category_info = [
                     '@type' => 'ListItem',
-                    'name' => $category->name,
-                    'url' => rtrim(Uri::root(), '/') . $category->category_link,
-                );
+                    'name'  => $category->name,
+                    'url'   => rtrim(Uri::root(), '/') . $category->category_link,
+                ];
                 if (!empty($category->category_image)) {
                     $category_info['image'] = $jshopConfig->image_product_live_path . '/' . $category->category_image;
                 }
@@ -338,14 +361,12 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
                     $category_info['description'] = strip_tags($category->$category_description);
                 }
                 $schema_org_list['itemListElement'][] = $category_info;
-
             }
 
             // Свойство position для элемента списка.
             for ($i = 0; $i < count($schema_org_list['itemListElement']); $i++) {
                 $schema_org_list['itemListElement'][$i]['position'] = $i + 1;
             }
-
         }
 
         $doc = $this->getApplication()->getDocument();
@@ -357,23 +378,22 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
      * В объекте категории пусто, так как это root-категория. Поэтому данные
      * берём из params
      *
-     * @param \Joomla\Event\Event $event
+     * @param   Event  $event
      *
      * @since 1.0.0
      */
     public function onBeforeDisplayManufacturerView(Event $event)
     {
-
         /**
-         * @param object $view JshoppingViewManufacturer
+         * @param   object  $view  JshoppingViewManufacturer
          */
         [$view] = $event->getArguments();
 
         $category_description = $this->params->get('category_desc_is', 'short_description');
-        $schema_org_list = [
+        $schema_org_list      = [
             '@context' => 'https://schema.org',
-            '@type' => 'ItemList',
-            'url' => Uri::current(),
+            '@type'    => 'ItemList',
+            'url'      => Uri::current(),
         ];
 
         //Заголовок окна браузера
@@ -389,13 +409,12 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
 
         // Добавляем вложенные категории
         if (isset($view->rows) && count($view->rows) > 0) {
-
             foreach ($view->rows as $manufacturer) {
-                $manufacturer_info = array(
+                $manufacturer_info = [
                     '@type' => 'ListItem',
-                    'name' => $manufacturer->name,
-                    'url' => rtrim(Uri::root(), '/') . $manufacturer->link,
-                );
+                    'name'  => $manufacturer->name,
+                    'url'   => rtrim(Uri::root(), '/') . $manufacturer->link,
+                ];
                 if (!empty($manufacturer->manufacturer_logo)) {
                     $manufacturer_info['image'] = $view->image_manufs_live_path . '/' . $manufacturer->manufacturer_logo;
                 }
@@ -403,14 +422,12 @@ class Wt_jshopping_schema_org extends CMSPlugin implements SubscriberInterface
                     $manufacturer_info['description'] = strip_tags($manufacturer->$category_description);
                 }
                 $schema_org_list['itemListElement'][] = $manufacturer_info;
-
             }
 
             // Свойство position для элемента списка.
             for ($i = 0; $i < count($schema_org_list['itemListElement']); $i++) {
                 $schema_org_list['itemListElement'][$i]['position'] = $i + 1;
             }
-
         }
 
         $doc = $this->getApplication()->getDocument();

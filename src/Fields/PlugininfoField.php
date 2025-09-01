@@ -4,7 +4,7 @@
  * @author        Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
  * @copyright     Copyright (C) 2022 Sergey Tolkachyov. All rights reserved.
  * @license       GNU General Public License version 3 or later
- * @version       2.0.0
+ * @version       2.1.0
  */
 
 namespace Joomla\Plugin\Jshoppingproducts\Wt_jshopping_schema_org\Fields;
@@ -34,13 +34,13 @@ class PlugininfoField extends NoteField
         $element = $data->get('element');
         $folder  = $data->get('folder');
         $wa      = Factory::getApplication()->getDocument()->getWebAssetManager();
-        $wa->addInlineStyle("
+        $wa->addInlineStyle('
 			.plugin-info-img-svg:hover * {
 				cursor:pointer;
 			}
-		");
+		');
 
-        $wt_plugin_info = simplexml_load_file(JPATH_SITE . "/plugins/" . $folder . "/" . $element . "/" . $element . ".xml");
+        $wt_plugin_info = simplexml_load_file(JPATH_SITE . '/plugins/' . $folder . '/' . $element . '/' . $element . '.xml');
 
 
         return $html = '<div class="d-flex shadow p-4">
@@ -63,7 +63,7 @@ class PlugininfoField extends NoteField
 			</div>
 			<div class="flex-grow-1 ms-3">
 				<span class="badge bg-success text-white">v.' . $wt_plugin_info->version . '</span>
-				' . Text::_("PLG_".strtoupper($element)."_DESC") . '
+				' . Text::_('PLG_'.strtoupper($element).'_DESC') . '
 			</div>
 		</div>';
     }

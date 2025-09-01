@@ -4,7 +4,7 @@
  * @author        Sergey Tolkachyov info@web-tolk.ru https://web-tolk.ru
  * @copyright     Copyright (C) 2022 Sergey Tolkachyov. All rights reserved.
  * @license       GNU General Public License version 3 or later
- * @version       2.0.0
+ * @version       2.1.0
  */
 declare(strict_types=1);
 
